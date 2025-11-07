@@ -11,31 +11,32 @@ const StudentReportsView = ({ isParentMode = false }) => {
   // fetchReports is re-created on each render; we only want to call it
   // when `isParentMode` changes. Disable exhaustive-deps here to avoid
   // adding fetchReports to the dependency list.
-  /* eslint-disable-next-line react-hooks/exhaustive-deps */
   useEffect(() => {
+    const fetchReports = async () => {
+      try {
+        // The student dashboard stores the student JWT under 'studentToken'
+        const token = localStorage.getItem('studentToken') || localStorage.getItem('token');
+        const endpoint = isParentMode ? '/api/v1/student-dashboard/parent-reports' : '/api/v1/student-dashboard/reports';
+
+        const response = await fetch(`http://localhost:8003${endpoint}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setReports(data);
+        }
+      } catch (error) {
+        console.error('Error fetching reports:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchReports();
   }, [isParentMode]);
 
-  const fetchReports = async () => {
-    try {
-  // The student dashboard stores the student JWT under 'studentToken'
-  const token = localStorage.getItem('studentToken') || localStorage.getItem('token');
-  const endpoint = isParentMode ? '/api/v1/student-dashboard/parent-reports' : '/api/v1/student-dashboard/reports';
-      
-      const response = await fetch(`http://localhost:8003${endpoint}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        setReports(data);
-      }
-    } catch (error) {
-      console.error('Error fetching reports:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  // fetchReports logic is inlined in the useEffect above.
 
   const markAsViewed = async (reportId) => {
     try {

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Send, Users, User, FileText, Mail, Calendar, CheckCircle } from 'lucide-react';
+import { Send, Users, User, FileText, Mail, Calendar, CheckCircle } from 'lucide-react';
 
 const SendReportModal = ({ isOpen, onClose, onSendReport }) => {
   const [formData, setFormData] = useState({
