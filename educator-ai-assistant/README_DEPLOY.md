@@ -18,7 +18,9 @@ Option A — Frontend on Vercel, Backend on Replit / Render (recommended)
 
 3. Connect frontend to backend
    - After the backend is running, note its public URL (e.g., https://your-repl.username.repl.co).
-   - Update the frontend to use that URL (the frontend currently proxies to `http://localhost:8003` in development; for production you may need to set the backend base URL in `frontend/src/services/api.js` or use environment variables).
+   - The frontend production build reads the backend URL from the environment variable `REACT_APP_API_BASE_URL` (this is required by Create React App). If you don't set it, the frontend will use the same origin as the site.
+   - In Vercel: go to Project Settings → Environment Variables and add `REACT_APP_API_BASE_URL` with the backend URL (for example `https://my-backend.onrender.com`). Then redeploy the frontend.
+   - Alternatively, you can change the value in `frontend/src/services/api.js` locally and rebuild, but using the environment variable is recommended.
 
 Option B — Full deploy on Render (or Heroku)
 

@@ -1,7 +1,10 @@
 import axios from 'axios';
 import toast from 'react-hot-toast';
 
-const API_BASE_URL = 'http://localhost:8003';
+// Use a build-time environment variable when deployed on Vercel.
+// For Create React App the variable must start with REACT_APP_. When not set,
+// fall back to window.location.origin so the frontend uses the same host.
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || window.location.origin;
 
 const api = axios.create({
   baseURL: API_BASE_URL,
