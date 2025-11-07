@@ -1,14 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { 
   FileText, Eye, Download, Calendar, User, Users, 
-  BookOpen, Award, AlertCircle, Clock
+  BookOpen, Award, AlertCircle
 } from 'lucide-react';
 
 const StudentReportsView = ({ isParentMode = false }) => {
   const [reports, setReports] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selectedReport, setSelectedReport] = useState(null);
 
+  // fetchReports is re-created on each render; we only want to call it
+  // when `isParentMode` changes. Disable exhaustive-deps here to avoid
+  // adding fetchReports to the dependency list.
+  /* eslint-disable-next-line react-hooks/exhaustive-deps */
   useEffect(() => {
     fetchReports();
   }, [isParentMode]);

@@ -23,6 +23,11 @@ const StudentDashboard = ({ studentData, onLogout }) => {
   const [showReportModal, setShowReportModal] = useState(false);
   const [selectedReport, setSelectedReport] = useState(null);
 
+  // loadTabData is defined below; we intentionally omit it from deps to
+  // avoid re-running when the function identity changes. ESLint would
+  // normally warn here. This effect only needs to run when `activeTab`
+  // changes.
+  /* eslint-disable-next-line react-hooks/exhaustive-deps */
   useEffect(() => {
     // Set up axios defaults for student authentication
     const token = localStorage.getItem('studentToken');

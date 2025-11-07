@@ -5,7 +5,6 @@ import axios from 'axios';
 const StudentManagement = () => {
   const [sections, setSections] = useState([]);
   const [selectedSection, setSelectedSection] = useState(null);
-  const [students, setStudents] = useState([]);
   const [filteredStudents, setFilteredStudents] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -18,10 +17,15 @@ const StudentManagement = () => {
   const [selectedStudent, setSelectedStudent] = useState(null);
   const navigate = useNavigate();
 
+  // fetchSections is stable for our use here; only run on mount
+  /* eslint-disable-next-line react-hooks/exhaustive-deps */
   useEffect(() => {
     fetchSections();
   }, []);
 
+  // fetchStudents is re-created on render; we only want to run when
+  // selectedSection or filters change.
+  /* eslint-disable-next-line react-hooks/exhaustive-deps */
   useEffect(() => {
     if (selectedSection) {
       fetchStudents();
@@ -111,9 +115,8 @@ const StudentManagement = () => {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       
-      console.log('Students response:', response.data);
-      setStudents(response.data);
-      setFilteredStudents(response.data);
+  console.log('Students response:', response.data);
+  setFilteredStudents(response.data);
       setError(null);
     } catch (error) {
       console.error('Error fetching students:', error);
@@ -124,7 +127,8 @@ const StudentManagement = () => {
       } else {
         setError('Failed to load students: ' + (error.response?.data?.detail || error.message));
       }
-      setStudents([]);
+  // Clear filtered students on error
+  setFilteredStudents([]);
       setFilteredStudents([]);
     } finally {
       setLoading(false);
