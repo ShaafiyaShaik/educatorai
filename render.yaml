@@ -6,19 +6,25 @@ services:
 		# Build: install dependencies from requirements.txt located in repo root
 		buildCommand: pip install -r requirements.txt
 		# Start: use uvicorn to run the FastAPI app. Render will inject $PORT.
-		startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+		startCommand: cd educator-ai-assistant && uvicorn app.main:app --host 0.0.0.0 --port $PORT
 		# Optional environment variables to set in the Render dashboard
 		envVars:
 			- key: DATABASE_URL
 				# value: set in Render dashboard (leave blank in repo)
 				sync: false
+			- key: SECRET_KEY
+				sync: false
+			- key: GEMINI_API_KEY
+				sync: false
+			- key: DEBUG
+				value: "false"
 
 	- type: static
 		name: educatorai-frontend
 		env: static
 		plan: free
 		# Build the React app located under educator-ai-assistant/frontend
-		buildCommand: cd educator-ai-assistant/frontend; npm install; npm run build
+		buildCommand: cd educator-ai-assistant/frontend && npm install && npm run build
 		staticPublishPath: educator-ai-assistant/frontend/build
 		envVars:
 			- key: REACT_APP_API_URL

@@ -30,7 +30,7 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
 
     # Google Gemini AI Configuration
-    GEMINI_API_KEY: str = "AIzaSyBWqTxhCsIWUhzORyCDlTqeg9sS6lPfXzU"
+    GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY", "AIzaSyBWqTxhCsIWUhzORyCDlTqeg9sS6lPfXzU")
     # Gemini model to use (changeable). Default to a faster "flash" model for snappier replies.
     GEMINI_MODEL: str = "gemini-2.0-flash"
     # Tuning params to limit response size and reduce latency

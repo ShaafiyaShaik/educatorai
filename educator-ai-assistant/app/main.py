@@ -40,10 +40,15 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# CORS middleware
+# CORS middleware - Allow both local development and production
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Configure appropriately for production
+    allow_origins=[
+        "http://localhost:3000",  # Local development
+        "http://localhost:8003",  # Local backend
+        "https://educatorai-frontend.onrender.com",  # Production frontend (update with your actual URL)
+        "*"  # Temporary - remove after testing
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
