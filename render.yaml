@@ -3,6 +3,8 @@ services:
     name: educatorai-backend
     env: python
     plan: free
+    # Specify Python version for compatibility
+    runtime: python-3.11
     # Build: install dependencies from requirements.txt located in repo root
     buildCommand: pip install -r requirements.txt
     # Start: use uvicorn to run the FastAPI app. Render will inject $PORT.
