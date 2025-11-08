@@ -1,5 +1,6 @@
 {
   "name": "educator-ai-frontend",
+    "homepage": ".",
   "version": "1.0.0",
   "description": "Modern React frontend for Educator AI Assistant",
   "private": true,

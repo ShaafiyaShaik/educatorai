@@ -44,10 +44,13 @@ api.interceptors.response.use(
           toast.error('Invalid email or password');
         }
       } else {
-        // Only redirect if user was already logged in and session expired
+        // Clear local token and surface the auth failure to the app instead of
+        // forcing navigation here. Components can detect `error.isAuthError`
+        // and show a login prompt or redirect in a controlled way.
         localStorage.removeItem('token');
         toast.error('Session expired. Please login again.');
-        window.location.href = '/login';
+        // attach a flag so consumers can handle auth-specific flow
+        try { error.isAuthError = true; } catch (e) { /* ignore */ }
       }
     } else if (error.response?.data) {
       // Handle FastAPI validation errors
