@@ -31,4 +31,10 @@ def init_db():
     """Initialize database tables"""
     # Import all models to ensure they're registered with SQLAlchemy
     import app.models
+    
+    # For SQLite, drop all tables and recreate to ensure clean schema
+    # This is safe on Render free tier since filesystem is ephemeral
+    if "sqlite" in settings.DATABASE_URL:
+        Base.metadata.drop_all(bind=engine)
+    
     Base.metadata.create_all(bind=engine)
