@@ -46,8 +46,7 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:3000",  # Local development
         "http://localhost:8003",  # Local backend
-        "https://educatorai-frontend.onrender.com",  # Production frontend (update with your actual URL)
-        "*"  # Temporary - remove after testing
+        "https://educatorai-frontend.onrender.com",  # Production frontend
     ],
     allow_credentials=True,
     allow_methods=["*"],
