@@ -19,13 +19,13 @@ services:
       - key: DEBUG
         value: "false"
 
-  - type: static
+  - type: web
     name: educatorai-frontend
-    env: static
+    env: node
     plan: free
     # Build the React app located under educator-ai-assistant/frontend
-    buildCommand: cd educator-ai-assistant/frontend && npm install && npm run build
-    staticPublishPath: educator-ai-assistant/frontend/build
+    buildCommand: cd educator-ai-assistant/frontend && npm install && npm run build && npm install -g serve
+    startCommand: cd educator-ai-assistant/frontend && serve -s build -l $PORT
     envVars:
       - key: REACT_APP_API_URL
         # Set this to the backend's public URL (e.g. https://<your-backend>.onrender.com)
