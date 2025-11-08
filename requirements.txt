@@ -1,4 +1,4 @@
-# Educator AI Administrative Assistant
+# Educator AI Administrative Assistant - Production Dependencies
 
 ## Core Dependencies
 fastapi==0.104.1
@@ -7,43 +7,24 @@ python-multipart==0.0.6
 
 ## Database
 sqlalchemy==2.0.23
-alembic==1.12.1
 
 ## Authentication & Security
 python-jose[cryptography]==3.3.0
 passlib[bcrypt]==1.7.4
-python-multipart==0.0.6
 
 ## Pydantic & Validation
 pydantic==2.5.0
 pydantic-settings==2.1.0
 email-validator==2.1.0
 
-## AI & LangChain with Hugging Face
-langchain==0.0.350
-langchain-community==0.0.10
-transformers==4.35.2
-torch==2.6.0
-accelerate==0.24.1
-sentence-transformers==2.2.2
-
-## Google Gemini AI
+## Google Gemini AI (lightweight, no heavy ML dependencies)
 google-generativeai==0.3.2
 
 ## Email & Communications
 aiosmtplib==3.0.1
 
-## Development & Testing
-pytest==7.4.3
-pytest-asyncio==0.21.1
-httpx==0.25.2
-
 ## Environment Management
 python-dotenv==1.0.0
-
-## Background Tasks (Optional)
-celery==5.3.4
-redis==5.0.1
 
 ## File Handling
 aiofiles==23.2.1
@@ -53,5 +34,5 @@ pandas==2.1.4
 openpyxl==3.1.2
 reportlab==4.0.8
 
-## Monitoring & Logging
-structlog==23.2.0
+## HTTP Client
+httpx==0.25.2
