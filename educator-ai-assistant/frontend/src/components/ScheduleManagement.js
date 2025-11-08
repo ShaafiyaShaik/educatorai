@@ -1,17 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+// useNavigate removed because navigate was unused
 import axios from 'axios';
 
 const ScheduleManagement = () => {
   const [tasks, setTasks] = useState([]);
   const [sections, setSections] = useState([]);
   const [teachers, setTeachers] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading] = useState(false);
   const [error, setError] = useState(null);
   const [showTaskModal, setShowTaskModal] = useState(false);
   const [editingTask, setEditingTask] = useState(null);
   const [conflicts, setConflicts] = useState(null);
-  const navigate = useNavigate();
+  // navigate removed (was unused)
 
   useEffect(() => {
     fetchTasks();
