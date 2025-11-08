@@ -1,16 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  LineChart, Line, Legend
+  PieChart, Pie, Cell, LineChart, Line, Legend
 } from 'recharts';
 import { 
-  Users, Award, AlertTriangle, Download, Filter,
-  BookOpen, Target, BarChart3, Send, Wifi, WifiOff
+  Users, TrendingUp, Award, AlertTriangle, Download, Filter,
+  BookOpen, GraduationCap, Target, BarChart3, Send, Wifi, WifiOff
 } from 'lucide-react';
 import axios from 'axios';
 import { SendReportModal, SentReportsHistory } from './SendReports';
 
-// COLORS removed (unused)
+const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
 
 const EnhancedPerformanceViews = () => {
   const [activeView, setActiveView] = useState('overall');
@@ -53,42 +53,11 @@ const EnhancedPerformanceViews = () => {
     };
   }, []);
 
-  const fetchPerformanceData = React.useCallback(async () => {
-    setLoading(true);
-    try {
-      const token = localStorage.getItem('token');
-      const headers = { 'Authorization': `Bearer ${token}` };
-
-      let endpoint = '';
-      switch (activeView) {
-        case 'overall':
-          endpoint = 'http://localhost:8003/api/v1/performance/overview';
-          break;
-        case 'filtered':
-          endpoint = 'http://localhost:8003/api/v1/performance/filtered';
-          break;
-        default:
-          endpoint = 'http://localhost:8003/api/v1/performance/overview';
-      }
-
-      let response;
-      if (activeView === 'filtered') {
-        response = await axios.post(endpoint, filters, { headers });
-      } else {
-        response = await axios.get(endpoint, { headers });
-      }
-
-      setPerformanceData(response.data);
-    } catch (error) {
-      console.error('Error fetching performance data:', error);
-    } finally {
-      setLoading(false);
+  useEffect(() => {
+    if (activeView) {
+      fetchPerformanceData();
     }
   }, [activeView, filters]);
-
-  useEffect(() => {
-    fetchPerformanceData();
-  }, [fetchPerformanceData]);
 
   // Initialize WebSocket connection for real-time updates
   useEffect(() => {
@@ -140,7 +109,7 @@ const EnhancedPerformanceViews = () => {
         wsRef.current.close();
       }
     };
-  }, [educatorIdRef]);
+  }, [educatorIdRef.current]);
 
   const fetchInitialData = async () => {
     try {
@@ -176,6 +145,38 @@ const EnhancedPerformanceViews = () => {
     }
   };
 
+  const fetchPerformanceData = async () => {
+    setLoading(true);
+    try {
+      const token = localStorage.getItem('token');
+      const headers = { 'Authorization': `Bearer ${token}` };
+
+      let endpoint = '';
+      switch (activeView) {
+        case 'overall':
+          endpoint = 'http://localhost:8003/api/v1/performance/overview';
+          break;
+        case 'filtered':
+          endpoint = 'http://localhost:8003/api/v1/performance/filtered';
+          break;
+        default:
+          endpoint = 'http://localhost:8003/api/v1/performance/overview';
+      }
+
+      let response;
+      if (activeView === 'filtered') {
+        response = await axios.post(endpoint, filters, { headers });
+      } else {
+        response = await axios.get(endpoint, { headers });
+      }
+
+      setPerformanceData(response.data);
+    } catch (error) {
+      console.error('Error fetching performance data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const fetchSentReports = async () => {
     try {

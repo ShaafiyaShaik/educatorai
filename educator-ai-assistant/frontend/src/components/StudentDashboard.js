@@ -23,63 +23,65 @@ const StudentDashboard = ({ studentData, onLogout }) => {
   const [showReportModal, setShowReportModal] = useState(false);
   const [selectedReport, setSelectedReport] = useState(null);
 
-  // loadTabData is defined below; we intentionally omit it from deps to
-  // avoid re-running when the function identity changes. ESLint would
-  // normally warn here. This effect only needs to run when `activeTab`
-  // changes.
   useEffect(() => {
-    // Inline tab-loading logic to satisfy eslint hook dependency checks.
-    const fetchForTab = async (tab) => {
-      setLoading(true);
-      setError('');
+    // Set up axios defaults for student authentication
+    const token = localStorage.getItem('studentToken');
+    if (token) {
+      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    }
 
-      try {
-        // Set up axios defaults for student authentication
-        const token = localStorage.getItem('studentToken');
-        if (token) {
-          axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-        }
-
-        switch (tab) {
-          case 'profile': {
-            const response = await axios.get('http://localhost:8003/api/v1/student-dashboard/profile');
-            setProfile(response.data);
-            break;
-          }
-          case 'marks': {
-            const response = await axios.get('http://localhost:8003/api/v1/student-dashboard/marks');
-            setMarks(response.data);
-            break;
-          }
-          case 'notifications': {
-            const response = await axios.get('http://localhost:8003/api/v1/student-dashboard/notifications');
-            setNotifications(response.data);
-            break;
-          }
-          case 'schedule': {
-            const response = await axios.get('http://localhost:8003/api/v1/student-dashboard/scheduled-events');
-            setScheduledEvents(response.data);
-            break;
-          }
-          default:
-            break;
-        }
-      } catch (err) {
-        console.error(`Error loading ${tab} data:`, err);
-        setError(`Failed to load ${tab} data`);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchForTab(activeTab);
+    // Load initial data based on active tab
+    loadTabData(activeTab);
   }, [activeTab]);
 
-  // Previously loadTabData was a separate function. Logic is now inlined
-  // inside the useEffect above to avoid hook dependency warnings.
+  const loadTabData = async (tab) => {
+    setLoading(true);
+    setError('');
 
-  // Specific loaders were previously defined separately. Their logic
-  // is now handled inline in the useEffect above.
+    try {
+      switch (tab) {
+        case 'profile':
+          await loadProfile();
+          break;
+        case 'marks':
+          await loadMarks();
+          break;
+        case 'notifications':
+          await loadNotifications();
+          break;
+        case 'schedule':
+          await loadScheduledEvents();
+          break;
+        default:
+          break;
+      }
+    } catch (error) {
+      console.error(`Error loading ${tab} data:`, error);
+      setError(`Failed to load ${tab} data`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadProfile = async () => {
+    const response = await axios.get('http://localhost:8003/api/v1/student-dashboard/profile');
+    setProfile(response.data);
+  };
+
+  const loadMarks = async () => {
+    const response = await axios.get('http://localhost:8003/api/v1/student-dashboard/marks');
+    setMarks(response.data);
+  };
+
+  const loadNotifications = async () => {
+    const response = await axios.get('http://localhost:8003/api/v1/student-dashboard/notifications');
+    setNotifications(response.data);
+  };
+
+  const loadScheduledEvents = async () => {
+    const response = await axios.get('http://localhost:8003/api/v1/student-dashboard/scheduled-events');
+    setScheduledEvents(response.data);
+  };
 
   const handleContactSubmit = async (e) => {
     e.preventDefault();

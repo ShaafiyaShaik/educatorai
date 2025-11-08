@@ -1,46 +1,35 @@
-# Render service manifest for educatorai
-# This file declares two services:
-# 1) educatorai-backend - a Python web service that runs FastAPI via uvicorn
-# 2) educatorai-frontend - a Static Site that builds the CRA frontend and publishes the build
-#
-# Notes:
-# - Replace placeholders (EXPLORE_BACKEND_URL) with the real backend URL after the backend is deployed,
-#   or set the env var `REACT_APP_API_BASE_URL` in the Render dashboard for the frontend service.
-# - The backend requirements may include heavy ML libraries (torch, transformers, langchain). These
-#   can be large and may require a larger instance plan on Render. If installation fails on the free
-#   plan, consider using a larger instance or moving heavy model inference to a specialized host.
-
 services:
-  - type: web
-    name: educatorai-backend
-    env: python
-    # If you keep this repo on GitHub, Render will detect and use it when you create a new service.
-    repo: https://github.com/ShaafiyaShaik/educatorai
-    branch: main
-    buildCommand: pip install -r requirements.txt
-    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
-    plan: free
-    autoDeploy: true
-    # Add environment variables and secrets in the Render dashboard after creation
-    # Example envVars to add on the Render UI (do not commit secrets to git):
-    # - DATABASE_URL: <your-db-url>
-    # - SECRET_KEY: <your-secret>
+	- type: web
+		name: educatorai-backend
+		env: python
+		plan: free
+		# Build: install dependencies from requirements.txt located in repo root
+		buildCommand: pip install -r requirements.txt
+		# Start: use uvicorn to run the FastAPI app. Render will inject $PORT.
+		startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+		# Optional environment variables to set in the Render dashboard
+		envVars:
+			- key: DATABASE_URL
+				# value: set in Render dashboard (leave blank in repo)
+				sync: false
 
-  - type: static
-    name: educatorai-frontend
-    env: static
-    repo: https://github.com/ShaafiyaShaik/educatorai
-    branch: main
-    # Build from the frontend subfolder
-    buildCommand: cd educator-ai-assistant/frontend && npm ci && npm run build
-    staticPublishPath: educator-ai-assistant/frontend/build
-    plan: free
-    autoDeploy: true
-    # IMPORTANT: Set REACT_APP_API_BASE_URL to point to your backend's public URL
-    # You can set that value in the Render dashboard after the backend service is active.
-    envVars:
-      - key: REACT_APP_API_BASE_URL
-        value: "https://EXPLORE_BACKEND_URL"
+	- type: static
+		name: educatorai-frontend
+		env: static
+		plan: free
+		# Build the React app located under educator-ai-assistant/frontend
+		buildCommand: cd educator-ai-assistant/frontend; npm install; npm run build
+		staticPublishPath: educator-ai-assistant/frontend/build
+		envVars:
+			- key: REACT_APP_API_URL
+				# Set this to the backend's public URL (e.g. https://<your-backend>.onrender.com)
+				sync: false
 
-# Optional: you can add health checks, instance counts, and other settings in the Render UI
-# or extend this manifest with more fields. See https://render.com/docs/deploy-using-render-yaml
+# Notes:
+# - This render.yaml defines two services: a Python web service for the FastAPI
+#   backend and a Static Site for the React frontend. Replace the placeholder
+#   env var values in the Render dashboard after connecting your repo.
+# - If you'd prefer to run the frontend as a Node web service instead of a
+#   static site, change the frontend service type to `web` and set an
+#   appropriate `startCommand` (e.g. `serve -s build` or a small Node/Express
+#   server).

@@ -1,42 +1,38 @@
 import React, { useState, useEffect } from 'react';
 import { 
   FileText, Eye, Download, Calendar, User, Users, 
-  BookOpen, Award, AlertCircle
+  BookOpen, Award, AlertCircle, Clock
 } from 'lucide-react';
 
 const StudentReportsView = ({ isParentMode = false }) => {
   const [reports, setReports] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedReport, setSelectedReport] = useState(null);
 
-  // fetchReports is re-created on each render; we only want to call it
-  // when `isParentMode` changes. Disable exhaustive-deps here to avoid
-  // adding fetchReports to the dependency list.
   useEffect(() => {
-    const fetchReports = async () => {
-      try {
-        // The student dashboard stores the student JWT under 'studentToken'
-        const token = localStorage.getItem('studentToken') || localStorage.getItem('token');
-        const endpoint = isParentMode ? '/api/v1/student-dashboard/parent-reports' : '/api/v1/student-dashboard/reports';
-
-        const response = await fetch(`http://localhost:8003${endpoint}`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          setReports(data);
-        }
-      } catch (error) {
-        console.error('Error fetching reports:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchReports();
   }, [isParentMode]);
 
-  // fetchReports logic is inlined in the useEffect above.
+  const fetchReports = async () => {
+    try {
+  // The student dashboard stores the student JWT under 'studentToken'
+  const token = localStorage.getItem('studentToken') || localStorage.getItem('token');
+  const endpoint = isParentMode ? '/api/v1/student-dashboard/parent-reports' : '/api/v1/student-dashboard/reports';
+      
+      const response = await fetch(`http://localhost:8003${endpoint}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setReports(data);
+      }
+    } catch (error) {
+      console.error('Error fetching reports:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const markAsViewed = async (reportId) => {
     try {

@@ -100,15 +100,14 @@ import React, { useState, useEffect, useRef } from 'react';
       scheduledTime: ''
     });
 
-  // User Search State
-  const [userSearch, setUserSearch] = useState('');
-  // searchResults is written but not read in this component; keep the setter to allow async helpers to store results
-  const [, setSearchResults] = useState([]);
-  const [selectedUsers, setSelectedUsers] = useState([]);
+    // User Search State
+    const [userSearch, setUserSearch] = useState('');
+    const [searchResults, setSearchResults] = useState([]);
+    const [selectedUsers, setSelectedUsers] = useState([]);
 
-  // New State for All Operations (only setters used in this component)
-  const [, setAllCommunications] = useState([]);
-  const [, setIncomingEmails] = useState([]);
+    // New State for All Operations
+    const [allCommunications, setAllCommunications] = useState([]);
+    const [incomingEmails, setIncomingEmails] = useState([]);
 
 
     // Forms for various operations

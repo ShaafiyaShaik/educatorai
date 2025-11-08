@@ -1,10 +1,11 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 const StudentManagement = () => {
   const [sections, setSections] = useState([]);
   const [selectedSection, setSelectedSection] = useState(null);
+  const [students, setStudents] = useState([]);
   const [filteredStudents, setFilteredStudents] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -17,92 +18,101 @@ const StudentManagement = () => {
   const [selectedStudent, setSelectedStudent] = useState(null);
   const navigate = useNavigate();
 
-  // Inline sections fetching to avoid hook dependency warnings.
   useEffect(() => {
-    const fetchSections = async () => {
-      try {
-        const token = localStorage.getItem('token');
-        console.log('Fetching sections with token:', token ? 'Present' : 'Missing');
-
-        if (!token) {
-          setError('No authentication token found. Please log in again.');
-          navigate('/login');
-          return;
-        }
-
-        // Try multiple base URLs
-        const baseUrls = ['http://localhost:8003', 'http://localhost:8001', 'http://localhost:8002'];
-        let response = null;
-
-        for (const baseUrl of baseUrls) {
-          try {
-            response = await axios.get(`${baseUrl}/api/v1/students/sections`, {
-              headers: { 'Authorization': `Bearer ${token}` }
-            });
-            console.log(`Successfully connected to ${baseUrl}`);
-            window.API_BASE_URL = baseUrl;
-            break;
-          } catch (err) {
-            console.log(`Failed to connect to ${baseUrl}:`, err.message);
-            continue;
-          }
-        }
-
-        if (!response) {
-          throw new Error('Could not connect to any API server');
-        }
-
-        console.log('Sections response:', response.data);
-        setSections(response.data);
-
-        if (response.data.length > 0) {
-          setSelectedSection(response.data[0]);
-        } else {
-          setError('No sections found');
-        }
-      } catch (error) {
-        console.error('Error fetching sections:', error);
-        if (error.response?.status === 401) {
-          setError('Authentication failed. Please log in again.');
-          localStorage.removeItem('token');
-          navigate('/login');
-        } else {
-          setError('Failed to load sections: ' + (error.response?.data?.detail || error.message));
-        }
-      }
-    };
-
     fetchSections();
-  }, [navigate]);
+  }, []);
 
-  // Inline students fetching so effect does not reference an unstable function
-  const fetchStudentsHandler = useCallback(async () => {
-    if (!selectedSection) return;
-    setLoading(true);
+  useEffect(() => {
+    if (selectedSection) {
+      fetchStudents();
+    }
+  }, [selectedSection, filters]);
+
+  const fetchSections = async () => {
     try {
       const token = localStorage.getItem('token');
-      console.log('Fetching students for section:', selectedSection, 'with token:', token ? 'Present' : 'Missing');
-
+      console.log('Fetching sections with token:', token ? 'Present' : 'Missing');
+      
       if (!token) {
         setError('No authentication token found. Please log in again.');
         navigate('/login');
         return;
       }
+      
+      // Try both ports
+      const baseUrls = ['http://localhost:8003', 'http://localhost:8001', 'http://localhost:8002'];
+      let response = null;
+      
+      for (const baseUrl of baseUrls) {
+        try {
+          response = await axios.get(`${baseUrl}/api/v1/students/sections`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          console.log(`Successfully connected to ${baseUrl}`);
+          // Store the working base URL for future requests
+          window.API_BASE_URL = baseUrl;
+          break;
+        } catch (err) {
+          console.log(`Failed to connect to ${baseUrl}:`, err.message);
+          continue;
+        }
+      }
+      
+      if (!response) {
+        throw new Error('Could not connect to any API server');
+      }
+      
+      console.log('Sections response:', response.data);
+      setSections(response.data);
+      
+      if (response.data.length > 0) {
+        setSelectedSection(response.data[0]);
+      } else {
+        setError('No sections found');
+      }
+    } catch (error) {
+      console.error('Error fetching sections:', error);
+      if (error.response?.status === 401) {
+        setError('Authentication failed. Please log in again.');
+        localStorage.removeItem('token');
+        navigate('/login');
+      } else {
+        setError('Failed to load sections: ' + (error.response?.data?.detail || error.message));
+      }
+    }
+  };
 
+  const fetchStudents = async () => {
+    if (!selectedSection) return;
+    
+    setLoading(true);
+    try {
+      const token = localStorage.getItem('token');
+      console.log('Fetching students for section:', selectedSection, 'with token:', token ? 'Present' : 'Missing');
+      
+      if (!token) {
+        setError('No authentication token found. Please log in again.');
+        navigate('/login');
+        return;
+      }
+      
       const params = new URLSearchParams();
+      
       if (filters.search) params.append('search', filters.search);
       if (filters.passStatus) params.append('pass_status', filters.passStatus);
       if (filters.subjectFilter) params.append('subject_filter', filters.subjectFilter);
-
+      
+      // Use the base URL that worked for sections, or try both
       const baseUrl = window.API_BASE_URL || 'http://localhost:8003';
       const url = `${baseUrl}/api/v1/students/sections/${selectedSection.id}/students/filtered?${params}`;
       console.log('Fetching students from URL:', url);
-
+      
       const response = await axios.get(url, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
-
+      
       console.log('Students response:', response.data);
+      setStudents(response.data);
       setFilteredStudents(response.data);
       setError(null);
     } catch (error) {
@@ -114,17 +124,12 @@ const StudentManagement = () => {
       } else {
         setError('Failed to load students: ' + (error.response?.data?.detail || error.message));
       }
+      setStudents([]);
       setFilteredStudents([]);
     } finally {
       setLoading(false);
     }
-  }, [selectedSection, filters, navigate]);
-
-  useEffect(() => {
-    fetchStudentsHandler();
-  }, [selectedSection, filters, fetchStudentsHandler]);
-
-  
+  };
 
   const handleFilterChange = (filterType, value) => {
     setFilters(prev => ({
@@ -273,7 +278,7 @@ const StudentManagement = () => {
         <div className="bg-red-50 border border-red-200 rounded-md p-4">
           <p className="text-red-600">{error}</p>
           <button
-            onClick={fetchStudentsHandler}
+            onClick={fetchStudents}
             className="mt-2 text-sm text-red-600 hover:text-red-800 underline"
           >
             Try again

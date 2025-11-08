@@ -1,10 +1,10 @@
 import axios from 'axios';
 import toast from 'react-hot-toast';
 
-// Use a build-time environment variable when deployed on Vercel.
-// For Create React App the variable must start with REACT_APP_. When not set,
-// fall back to window.location.origin so the frontend uses the same host.
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || window.location.origin;
+// Allow configuring the API base URL via environment variable at build time
+// or via a runtime `window.API_BASE_URL` set by hosting platform. Fallback
+// to localhost for local development.
+const API_BASE_URL = process.env.REACT_APP_API_URL || (typeof window !== 'undefined' && window.API_BASE_URL) || 'http://localhost:8003';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -44,13 +44,10 @@ api.interceptors.response.use(
           toast.error('Invalid email or password');
         }
       } else {
-        // Clear local token and surface the auth failure to the app instead of
-        // forcing navigation here. Components can detect `error.isAuthError`
-        // and show a login prompt or redirect in a controlled way.
+        // Only redirect if user was already logged in and session expired
         localStorage.removeItem('token');
         toast.error('Session expired. Please login again.');
-        // attach a flag so consumers can handle auth-specific flow
-        try { error.isAuthError = true; } catch (e) { /* ignore */ }
+        window.location.href = '/login';
       }
     } else if (error.response?.data) {
       // Handle FastAPI validation errors
