@@ -81,10 +81,11 @@ export const educatorsAPI = {
   
   // POST /api/v1/educators/login - Login Educator
   login: (credentials) => {
-    const formData = new FormData();
-    formData.append('username', credentials.email || credentials.username);
-    formData.append('password', credentials.password);
-    return api.post('/api/v1/educators/login', formData, {
+    // OAuth2 expects application/x-www-form-urlencoded payload (username + password)
+    const params = new URLSearchParams();
+    params.append('username', credentials.email || credentials.username);
+    params.append('password', credentials.password);
+    return api.post('/api/v1/educators/login', params.toString(), {
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
     });
   },
