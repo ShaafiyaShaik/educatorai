@@ -5,7 +5,7 @@ import React, { useState, useEffect, useRef } from 'react';
     BarChart3
   } from 'lucide-react';
   import toast from 'react-hot-toast';
-  import { communications, aiAssistant, scheduling, educators } from '../services/api';
+  import { communications, aiAssistant, scheduling, educators, records } from '../services/api';
   import StudentManagement from './StudentManagement';
   import ScheduleManagement from './ScheduleManagement';
   import CalendarView from './CalendarView';
@@ -247,15 +247,68 @@ import React, { useState, useEffect, useRef } from 'react';
 
     const fetchRealStats = async () => {
       try {
-        // Just fetch communications for basic stats now
-        const commsRes = await communications.list();
-        const commsData = Array.isArray(commsRes.data?.data) ? commsRes.data.data : [];
+        // Fetch scheduling (week), incoming communications and records in parallel
+        // Try the week endpoint first; fallback to the root schedules list if the week endpoint is missing
+        let schedulesRes;
+        try {
+          schedulesRes = await scheduling.getWeekSchedule();
+        } catch (err) {
+          if (err?.response?.status === 404) {
+            // fallback to root schedules endpoint which returns { schedules: [...], total }
+            schedulesRes = await scheduling.list();
+          } else {
+            throw err;
+          }
+        }
+
+        const [incomingCommsRes, recordsRes] = await Promise.all([
+          communications.getIncoming(),
+          records.list()
+        ]);
+
+        const now = new Date();
+
+        // schedulesRes -> might be an array (pydantic list) or wrapped
+        const scheduleData = Array.isArray(schedulesRes.data) ? schedulesRes.data : (Array.isArray(schedulesRes) ? schedulesRes : []);
+
+        // Count upcoming events in the returned schedule data
+        const upcomingEvents = scheduleData.filter(event => {
+          try {
+            const start = event.start || event.start_datetime || event.start_date || event.start_time || event.start_datetime_iso || event.startDate;
+            if (!start) return false;
+            const d = new Date(start);
+            return d > now;
+          } catch (e) {
+            return false;
+          }
+        }).length;
+
+        // incoming communications: use unread_count if available, otherwise count returned items
+        const incoming = incomingCommsRes?.data || incomingCommsRes || {};
+        const pendingEmails = Number(incoming.unread_count ?? (Array.isArray(incoming.data) ? incoming.data.length : incoming.total ?? 0)) || 0;
+
+        // records: backend may return [] or an object; normalize
+        const recordsData = Array.isArray(recordsRes.data) ? recordsRes.data : (Array.isArray(recordsRes) ? recordsRes : []);
+        // Count active records (exclude archived/deleted when status field present)
+        const activeRecords = (recordsData || []).filter(r => {
+          if (!r) return false;
+          const s = (r.status || '').toString().toLowerCase();
+          return s !== 'archived' && s !== 'deleted';
+        }).length || 0;
+
+        // completed tasks: infer from schedule entries that have status 'completed' or is_completed flag
+        const completedTasks = (scheduleData || []).filter(ev => {
+          const status = (ev.status || '').toString().toLowerCase();
+          if (status === 'completed' || ev.is_completed === true) return true;
+          if (ev.isCompleted === true || ev.completed === true) return true;
+          return false;
+        }).length || 0;
 
         setStats({
-          upcomingEvents: 0,
-          pendingEmails: commsData.length || 0,
-          activeRecords: 0,
-          completedTasks: 0
+          upcomingEvents: upcomingEvents || 0,
+          pendingEmails: pendingEmails || 0,
+          activeRecords: activeRecords || 0,
+          completedTasks: completedTasks || 0
         });
       } catch (error) {
         console.error('Failed to fetch stats:', error);
@@ -270,6 +323,13 @@ import React, { useState, useEffect, useRef } from 'react';
 
     // ===== COMPREHENSIVE DATA FETCHING FUNCTIONS =====
     
+    // Poll stats periodically so the Overview shows near-real-time data
+    useEffect(() => {
+      // initial fetch
+      fetchRealStats();
+      const iv = setInterval(fetchRealStats, 15000); // refresh every 15s
+      return () => clearInterval(iv);
+    }, []);
 
 
     const fetchAllCommunications = async () => {

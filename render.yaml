@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 services:
   - type: web
     name: educatorai-backend
@@ -41,3 +42,5 @@ services:
 #   static site, change the frontend service type to `web` and set an
 #   appropriate `startCommand` (e.g. `serve -s build` or a small Node/Express
 #   server).
+=======
+>>>>>>> Stashed changes

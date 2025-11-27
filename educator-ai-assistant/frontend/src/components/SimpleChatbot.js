@@ -31,7 +31,27 @@ const SimpleChatbot = () => {
       const payload = { message: userMsg.content, history: messages.concat(userMsg), auto_execute: true };
       const resp = await api.post('/api/v1/simple-chatbot/message', payload);
       const reply = resp.data && resp.data.reply ? resp.data.reply : 'No response';
-      const assistantMsg = { id: Date.now() + 1, role: 'assistant', content: reply };
+      // Preserve action/executed metadata so the UI can render disambiguation buttons
+      const assistantMsg = { id: Date.now() + 1, role: 'assistant', content: reply, meta: resp.data };
+      setMessages((m) => [...m, assistantMsg]);
+    } catch (e) {
+      const errMsg = { id: Date.now() + 2, role: 'assistant', content: 'Error contacting chatbot.' };
+      setMessages((m) => [...m, errMsg]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const sendQuickReply = async (text) => {
+    if (!text) return;
+    const userMsg = { id: Date.now(), role: 'user', content: text };
+    setMessages((m) => [...m, userMsg]);
+    setLoading(true);
+    try {
+      const payload = { message: userMsg.content, history: messages.concat(userMsg), auto_execute: true };
+      const resp = await api.post('/api/v1/simple-chatbot/message', payload);
+      const reply = resp.data && resp.data.reply ? resp.data.reply : 'No response';
+      const assistantMsg = { id: Date.now() + 1, role: 'assistant', content: reply, meta: resp.data };
       setMessages((m) => [...m, assistantMsg]);
     } catch (e) {
       const errMsg = { id: Date.now() + 2, role: 'assistant', content: 'Error contacting chatbot.' };
@@ -62,8 +82,23 @@ const SimpleChatbot = () => {
         <div className="space-y-4">
           {messages.map((m) => (
             <div key={m.id} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-              <div className={`inline-block p-3 rounded-2xl ${m.role === 'user' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-900'}`}>
-                <div style={{ whiteSpace: 'pre-wrap' }}>{m.content}</div>
+              <div>
+                <div className={`inline-block p-3 rounded-2xl ${m.role === 'user' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-900'}`}>
+                  <div style={{ whiteSpace: 'pre-wrap' }}>{m.content}</div>
+                </div>
+                {m.role === 'assistant' && m.meta && m.meta.executed && m.meta.executed.suggestions && (
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {m.meta.executed.suggestions.map((sugg, idx) => (
+                      <button
+                        key={idx}
+                        className="px-3 py-1 text-sm bg-gray-200 rounded-md hover:bg-gray-300"
+                        onClick={() => sendQuickReply(String(idx + 1))}
+                      >
+                        {idx + 1}) {sugg}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           ))}

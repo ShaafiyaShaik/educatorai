@@ -219,8 +219,10 @@ const Login = ({ setIsAuthenticated }) => {
           </p>
           <div className="space-y-2 text-xs text-white/70">
             <div className="text-center">
-              <p><strong>Teacher:</strong> shaafiya07@gmail.com | password123</p>
-              <p><strong>Student:</strong> S101@gmail.com, S102@gmail.com, S201@gmail.com | password123</p>
+              <p><strong>Teacher:</strong> ananya.rao@school.com | Ananya@123</p>
+              <p className="mt-2"><strong>Students:</strong></p>
+              <p>jennifer.colon@student.edu | student123</p>
+              <p>nichole.smith@student.edu | student123</p>
             </div>
           </div>
         </div>

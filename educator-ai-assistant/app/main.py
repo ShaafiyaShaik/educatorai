@@ -69,12 +69,16 @@ app.include_router(records.router, prefix="/api/v1/records", tags=["records"])
 app.include_router(compliance.router, prefix="/api/v1/compliance", tags=["compliance"])
 app.include_router(meeting_requests.router, prefix="/api/v1/meeting-requests", tags=["meeting-requests"])
 app.include_router(meeting_scheduler.router, prefix="/api/v1/meetings", tags=["meeting-scheduler"])
+app.include_router(__import__("app.api.actions", fromlist=["router"]).router, prefix="/api/v1/actions", tags=["actions"])
 # Chatbot/assistant modules removed by user request
 
 # Register the new isolated simple chatbot router (keeps all logic separate
 # from any previous assistant implementations).
 from app.api import simple_chatbot
 app.include_router(simple_chatbot.router, prefix="/api/v1/simple-chatbot", tags=["simple-chatbot"])
+# Action engine: internal routes the chatbot can call to perform actions
+from app.api import action_engine
+app.include_router(action_engine.router, prefix="/api/v1/action-engine", tags=["action-engine"])
 
 @app.get("/")
 async def root():

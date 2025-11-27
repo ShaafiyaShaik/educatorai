@@ -10,7 +10,7 @@ from .communication import Communication
 from .notification import Notification
 from .report import SentReport
 from .performance import Exam, Attendance, PerformanceCache, StudentPerformanceSummary
-from .conversation import Conversation
+from .action_log import ActionLog
 
 __all__ = [
     "Educator",
@@ -32,5 +32,5 @@ __all__ = [
     "PerformanceCache",
     "StudentPerformanceSummary"
     ,
-    "Conversation"
+    "ActionLog"
 ]

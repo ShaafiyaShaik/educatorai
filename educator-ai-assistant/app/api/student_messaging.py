@@ -167,7 +167,10 @@ async def send_message(
 
     # If message is targeted to parent (or both), create a Notification record tied to the student
     try:
-        if message.receiver_type in ('parent', 'both'):
+        # Create a Notification record for the student so they see the message
+        # in their notifications regardless of whether the target is student,
+        # parent, or both. Reports already create a notification earlier.
+        if message.receiver_type in ('student', 'parent', 'both'):
             notification = Notification(
                 educator_id=current_educator.id,
                 student_id=message.receiver_id,

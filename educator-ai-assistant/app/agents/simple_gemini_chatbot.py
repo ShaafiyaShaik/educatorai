@@ -25,6 +25,7 @@ from app.core.simple_chatbot_config import (
     SIMPLE_GEMINI_MAX_TOKENS,
     SIMPLE_GEMINI_TEMPERATURE,
     SIMPLE_GEMINI_DEV_FALLBACK,
+    SIMPLE_GEMINI_ALT_API_KEYS,
 )
 
 logger = logging.getLogger(__name__)
@@ -48,6 +49,16 @@ class SimpleGeminiChatbot:
         self.max_tokens = SIMPLE_GEMINI_MAX_TOKENS
         self.temperature = SIMPLE_GEMINI_TEMPERATURE
         self.dev_fallback = SIMPLE_GEMINI_DEV_FALLBACK
+        # Track configured API key and alternates so we can rotate on quota
+        # errors without requiring a process restart.
+        self.api_key = SIMPLE_GEMINI_API_KEY
+        self.alt_keys = SIMPLE_GEMINI_ALT_API_KEYS if 'SIMPLE_GEMINI_ALT_API_KEYS' in globals() else []
+        try:
+            genai.configure(api_key=self.api_key)
+        except Exception:
+            # Non-fatal: configuration may fail in some dev environments; we'll
+            # surface errors on calls instead.
+            logger.debug("Failed to configure genai client with initial key")
 
     def _generate_with_retries(self, prompt: str, max_retries: int = 3):
         """Attempt model.generate_content with exponential backoff on quota errors.
@@ -82,11 +93,47 @@ class SimpleGeminiChatbot:
                         is_quota = True
 
                 if is_quota:
+                    # Try rotating through alternate API keys (if provided) before
+                    # falling back to exponential backoff retry. Build a candidate
+                    # list starting with the current key.
+                    keys_to_try = [getattr(self, 'api_key', SIMPLE_GEMINI_API_KEY)]
+                    try:
+                        for k in getattr(self, 'alt_keys', []):
+                            if k and k not in keys_to_try:
+                                keys_to_try.append(k)
+                    except Exception:
+                        # alt_keys may not exist in some dev setups
+                        pass
+
+                    logger.warning("Gemini quota hit for current key; attempting key rotation through %d keys", len(keys_to_try))
+                    rotated = False
+                    for k in keys_to_try:
+                        try:
+                            logger.info("Trying Gemini API key rotation with a different key (partial masked)")
+                            genai.configure(api_key=k)
+                            # update the configured key on success
+                            self.api_key = k
+                            model = genai.GenerativeModel(self.model)
+                            resp = model.generate_content(prompt)
+                            rotated = True
+                            return resp
+                        except Exception as e2:
+                            # If the error for this key is a quota error, continue to next
+                            msg2 = str(e2).lower()
+                            if "quota" in msg2 or "429" in msg2 or "resourceexhausted" in msg2:
+                                logger.warning("Key rotation attempt hit quota for this key; trying next key")
+                                continue
+                            else:
+                                # Non-quota error for this key — log and try next key
+                                logger.exception("Key rotation attempt failed with non-quota error: %s", e2)
+                                continue
+
+                    # If rotation didn't succeed, fallback to exponential backoff
                     attempt += 1
                     if attempt > max_retries:
                         break
                     sleep = (2 ** attempt) + random.uniform(0, 1)
-                    logger.warning("Gemini quota hit; retrying in %.1fs (attempt %d/%d)", sleep, attempt, max_retries)
+                    logger.warning("Gemini quota hit; no keys available or all exhausted. Retrying in %.1fs (attempt %d/%d)", sleep, attempt, max_retries)
                     time.sleep(sleep)
                     continue
 

@@ -12,7 +12,16 @@ from os import getenv
 # Default API key provided by the user. Can be overridden via env var.
 DEFAULT_GEMINI_API_KEY = "AIzaSyBWqTxhCsIWUhzORyCDlTqeg9sS6lPfXzU"
 
+# Primary API key (can be overridden by env)
 SIMPLE_GEMINI_API_KEY = getenv("SIMPLE_GEMINI_API_KEY", DEFAULT_GEMINI_API_KEY)
+
+# Comma-separated list of alternate Gemini API keys to use when the primary
+# key exhausts quota. Example:
+# SIMPLE_GEMINI_ALT_API_KEYS="key1,key2"
+# Defaults to the single key the user provided for fallback.
+DEFAULT_ALT_KEYS = "AIzaSyAm6h1ENfR1uwxdmsBQfdvZpcxkC6hBVsQ"
+alt_raw = getenv("SIMPLE_GEMINI_ALT_API_KEYS", DEFAULT_ALT_KEYS)
+SIMPLE_GEMINI_ALT_API_KEYS = [k.strip() for k in alt_raw.split(",") if k.strip()]
 
 # Model selection and generation parameters
 # Use a stable model known to be supported for generate_content in this repo.

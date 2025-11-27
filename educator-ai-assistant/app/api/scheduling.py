@@ -454,3 +454,46 @@ async def get_schedules(
     ).order_by(Schedule.start_datetime.desc()).all()
     
     return {"schedules": schedules, "total": len(schedules)}
+
+
+@router.get("/upcoming/week")
+async def get_week_schedule(
+    current_educator: Educator = Depends(get_current_educator),
+    db: Session = Depends(get_db)
+):
+    """Return schedule events for the upcoming week for the current educator."""
+    from datetime import datetime, timedelta
+
+    try:
+        today = datetime.now()
+        # start of current week (Monday)
+        start = today - timedelta(days=today.weekday())
+        # include next 7 days
+        end = start + timedelta(days=7)
+
+        query = db.query(Schedule).filter(
+            Schedule.educator_id == current_educator.id,
+            Schedule.start_datetime >= start,
+            Schedule.start_datetime <= end
+        ).order_by(Schedule.start_datetime)
+
+        schedules = query.all()
+
+        out = []
+        for s in schedules:
+            out.append({
+                "id": s.id,
+                "title": s.title,
+                "start": s.start_datetime.isoformat() if s.start_datetime else None,
+                "end": s.end_datetime.isoformat() if s.end_datetime else None,
+                "start_datetime": s.start_datetime.isoformat() if s.start_datetime else None,
+                "end_datetime": s.end_datetime.isoformat() if s.end_datetime else None,
+                "location": s.location,
+                "status": s.status.value if hasattr(s.status, 'value') else str(s.status),
+                "event_type": s.event_type.value if hasattr(s.event_type, 'value') else str(s.event_type),
+                "is_completed": getattr(s, 'status', None) == EventStatus.COMPLETED
+            })
+
+        return out
+    except Exception as e:
+        return []

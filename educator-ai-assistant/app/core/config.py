@@ -16,6 +16,8 @@ class Settings(BaseSettings):
 
     # Redis (optional for background tasks)
     REDIS_URL: str = "redis://localhost:6379/0"
+    # Conversation state backend: 'redis' or 'memory' (default 'auto' uses redis if REDIS_URL set)
+    CONVERSATION_STATE_BACKEND: str = "auto"
 
     # Logging
     LOG_LEVEL: str = "INFO"

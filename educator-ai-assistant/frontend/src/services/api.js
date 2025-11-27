@@ -1,10 +1,7 @@
 import axios from 'axios';
 import toast from 'react-hot-toast';
 
-// Allow configuring the API base URL via environment variable at build time
-// or via a runtime `window.API_BASE_URL` set by hosting platform. Fallback
-// to localhost for local development.
-const API_BASE_URL = process.env.REACT_APP_API_URL || (typeof window !== 'undefined' && window.API_BASE_URL) || 'http://localhost:8003';
+const API_BASE_URL = 'http://localhost:8003';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
