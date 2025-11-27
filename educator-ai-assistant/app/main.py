@@ -16,6 +16,7 @@ from contextlib import asynccontextmanager
 import uvicorn
 from app.core.config import settings
 from app.core.database import init_db
+from os import getenv
 from app.api import (
     educators, dashboard, communications,
     users, students, students_auth, student_dashboard,
@@ -29,6 +30,15 @@ from app.api import (
 async def lifespan(app: FastAPI):
     # Startup
     init_db()
+    # Optionally seed demo users if environment explicitly requests it
+    if getenv("SEED_DEMO_USERS", "false").lower() in ("1", "true", "yes"):
+        try:
+            from app.scripts.seed_demo_users import seed_demo_educators
+            seed_demo_educators()
+        except Exception:
+            # Avoid crashing startup if seeding fails; log can be checked in deployment
+            import logging
+            logging.exception("Failed to seed demo users")
     yield
     # Shutdown
     pass
