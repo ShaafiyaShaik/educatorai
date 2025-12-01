@@ -13,6 +13,8 @@ from sqlalchemy.orm import Session
 import os
 
 from app.models.educator import Educator
+from app.core.auth import get_password_hash
+from fastapi import Body
 
 router = APIRouter()
 
@@ -58,5 +60,29 @@ def debug_db_educator():
             "ananya_id": ananya.id if ananya else None,
             "ananya_email": ananya.email if ananya else None,
         }
+    finally:
+        db.close()
+
+
+@router.post("/reset-ananya-password")
+def reset_ananya_password(password: str = Body(default="Ananya@123")):
+    """Reset the demo educator Ananya's password to a known value.
+
+    This is an admin/debug helper to ensure the demo account has a usable
+    password for deployments. It should be removed or protected in production.
+    """
+    try:
+        db = next(get_db())
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"DB session error: {exc}")
+
+    try:
+        ananya = db.query(Educator).filter(Educator.email == "ananya.rao@school.com").first()
+        if not ananya:
+            raise HTTPException(status_code=404, detail="Ananya educator not found")
+        ananya.hashed_password = get_password_hash(password)
+        db.add(ananya)
+        db.commit()
+        return {"status": "ok", "message": "Password reset", "password_set": password}
     finally:
         db.close()
