@@ -1,4 +1,3 @@
-<<<<<<< Updated upstream
 services:
   - type: web
     name: educatorai-backend
@@ -30,17 +29,11 @@ services:
     buildCommand: cd educator-ai-assistant/frontend && npm install && npm run build && npm install -g serve
     startCommand: cd educator-ai-assistant/frontend && serve -s build -l $PORT
     envVars:
-      - key: REACT_APP_API_URL
-        # Set this to the backend's public URL (e.g. https://<your-backend>.onrender.com)
+      - key: REACT_APP_API_BASE_URL
+        # Set this to the backend's public URL (e.g. https://educatorai-backend.onrender.com)
         sync: false
 
 # Notes:
 # - This render.yaml defines two services: a Python web service for the FastAPI
-#   backend and a Static Site for the React frontend. Replace the placeholder
+#   backend and a web service for the React frontend. Replace the placeholder
 #   env var values in the Render dashboard after connecting your repo.
-# - If you'd prefer to run the frontend as a Node web service instead of a
-#   static site, change the frontend service type to `web` and set an
-#   appropriate `startCommand` (e.g. `serve -s build` or a small Node/Express
-#   server).
-=======
->>>>>>> Stashed changes
