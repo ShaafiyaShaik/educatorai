@@ -24,6 +24,7 @@ from app.api import (
     scheduling, records, compliance, meeting_requests,
     meeting_scheduler
 )
+from app.api import admin as admin_api
 
 # Initialize FastAPI app
 @asynccontextmanager
@@ -80,6 +81,10 @@ app.include_router(compliance.router, prefix="/api/v1/compliance", tags=["compli
 app.include_router(meeting_requests.router, prefix="/api/v1/meeting-requests", tags=["meeting-requests"])
 app.include_router(meeting_scheduler.router, prefix="/api/v1/meetings", tags=["meeting-scheduler"])
 app.include_router(__import__("app.api.actions", fromlist=["router"]).router, prefix="/api/v1/actions", tags=["actions"])
+app.include_router(admin_api.router, prefix="/api/v1/admin", tags=["admin"])
+# Debug admin endpoints (temporary) to report runtime DB path and quick checks
+from app.api import debug_db
+app.include_router(debug_db.router, prefix="/api/v1/admin", tags=["admin-debug"])
 # Chatbot/assistant modules removed by user request
 
 # Register the new isolated simple chatbot router (keeps all logic separate

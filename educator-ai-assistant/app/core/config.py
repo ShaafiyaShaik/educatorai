@@ -24,6 +24,9 @@ class Settings(BaseSettings):
     LOG_FILE: str = "./logs/educator_assistant.log"
 
     # Database
+    # Default to the project-root DB file used in local runs and recovery.
+    # Many scripts and the recovered snapshot use `./educator_db.sqlite` at the
+    # project root. Set `DATABASE_URL` in the environment to override.
     DATABASE_URL: str = "sqlite:///./educator_db.sqlite"
 
     # Security

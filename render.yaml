@@ -13,6 +13,11 @@ services:
     envVars:
       - key: DATABASE_URL
         # value: set in Render dashboard (leave blank in repo)
+        # If you want the service to use the recovered project DB file that
+        # exists in the repository root, set this to: sqlite:///./educator_db.sqlite
+        # Note: committing the SQLite file into the repo will make it available
+        # to the Render build/container. For persistent production data prefer
+        # a managed DB and set DATABASE_URL accordingly.
         sync: false
       - key: SECRET_KEY
         sync: false
