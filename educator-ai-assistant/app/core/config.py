@@ -5,6 +5,7 @@ Core configuration settings for the Educator AI Assistant
 from pydantic_settings import BaseSettings
 from typing import Optional
 import os
+from pathlib import Path
 
 class Settings(BaseSettings):
     # App settings
@@ -24,10 +25,25 @@ class Settings(BaseSettings):
     LOG_FILE: str = "./logs/educator_assistant.log"
 
     # Database
-    # Default to the project-root DB file used in local runs and recovery.
-    # Many scripts and the recovered snapshot use `./educator_db.sqlite` at the
-    # project root. Set `DATABASE_URL` in the environment to override.
-    DATABASE_URL: str = "sqlite:///./educator_db.sqlite"
+    # Determine DATABASE_URL with this priority (best for deploys):
+    # 1. Environment variable `DATABASE_URL` (set by the host)
+    # 2. Environment variable `PRODUCTION_DATABASE_URL` (alternate key)
+    # 3. A repository file `DEPLOY_DATABASE_URL` (optional, contains the URL)
+    # 4. Fallback to the project-root SQLite file used for local development
+    _deploy_file = Path(__file__).resolve().parents[2] / "DEPLOY_DATABASE_URL"
+    _deploy_file_url = None
+    if _deploy_file.exists():
+        try:
+            _deploy_file_url = _deploy_file.read_text(encoding="utf-8").strip()
+        except Exception:
+            _deploy_file_url = None
+
+    DATABASE_URL: str = (
+        os.getenv("DATABASE_URL")
+        or os.getenv("PRODUCTION_DATABASE_URL")
+        or _deploy_file_url
+        or "sqlite:///./educator_db.sqlite"
+    )
 
     # Security
     SECRET_KEY: str = "your-secret-key-change-in-production"
