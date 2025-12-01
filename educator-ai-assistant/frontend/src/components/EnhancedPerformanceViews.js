@@ -8,6 +8,7 @@ import {
   BookOpen, GraduationCap, Target, BarChart3, Send, Wifi, WifiOff
 } from 'lucide-react';
 import axios from 'axios';
+import { API_BASE_URL } from '../services/api';
 import { SendReportModal, SentReportsHistory } from './SendReports';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
@@ -66,7 +67,9 @@ const EnhancedPerformanceViews = () => {
 
     const connectWebSocket = () => {
       try {
-        const wsUrl = `ws://localhost:8003/ws/performance/${educatorIdRef.current}`;
+        // Use wss if the API base is https
+        const wsBase = API_BASE_URL.replace(/^http/, 'ws');
+        const wsUrl = `${wsBase}/ws/performance/${educatorIdRef.current}`;
         wsRef.current = new WebSocket(wsUrl);
 
         wsRef.current.onopen = () => {
@@ -118,8 +121,8 @@ const EnhancedPerformanceViews = () => {
 
       // Fetch sections and subjects for filters, and current educator info for WebSocket
       const [sectionsRes, dashboardRes] = await Promise.all([
-        axios.get('http://localhost:8003/api/v1/students/sections', { headers }),
-        axios.get('http://localhost:8003/api/v1/dashboard/dashboard', { headers })
+        axios.get(`${API_BASE_URL}/api/v1/students/sections`, { headers }),
+        axios.get(`${API_BASE_URL}/api/v1/dashboard/dashboard`, { headers })
       ]);
 
       setSections(sectionsRes.data.sections || []);
@@ -154,13 +157,13 @@ const EnhancedPerformanceViews = () => {
       let endpoint = '';
       switch (activeView) {
         case 'overall':
-          endpoint = 'http://localhost:8003/api/v1/performance/overview';
+          endpoint = `${API_BASE_URL}/api/v1/performance/overview`;
           break;
         case 'filtered':
-          endpoint = 'http://localhost:8003/api/v1/performance/filtered';
+          endpoint = `${API_BASE_URL}/api/v1/performance/filtered`;
           break;
         default:
-          endpoint = 'http://localhost:8003/api/v1/performance/overview';
+          endpoint = `${API_BASE_URL}/api/v1/performance/overview`;
       }
 
       let response;
@@ -183,7 +186,7 @@ const EnhancedPerformanceViews = () => {
       const token = localStorage.getItem('token');
       const headers = { 'Authorization': `Bearer ${token}` };
       
-      const response = await axios.get('http://localhost:8003/api/v1/performance/sent-reports', { headers });
+      const response = await axios.get(`${API_BASE_URL}/api/v1/performance/sent-reports`, { headers });
       setSentReports(response.data);
     } catch (error) {
       console.error('Error fetching sent reports:', error);
@@ -195,7 +198,7 @@ const EnhancedPerformanceViews = () => {
       const token = localStorage.getItem('token');
       const headers = { 'Authorization': `Bearer ${token}` };
       
-      const response = await axios.post('http://localhost:8003/api/v1/performance/send-report', reportData, { headers });
+      const response = await axios.post(`${API_BASE_URL}/api/v1/performance/send-report`, reportData, { headers });
       
       if (response.data.success) {
         alert(`Report sent successfully! Generated ${response.data.report_count} reports.`);
@@ -213,7 +216,7 @@ const EnhancedPerformanceViews = () => {
       const token = localStorage.getItem('token');
       const headers = { 'Authorization': `Bearer ${token}` };
       
-      const response = await axios.get(`http://localhost:8003/api/v1/performance/student/${studentId}`, { headers });
+      const response = await axios.get(`${API_BASE_URL}/api/v1/performance/student/${studentId}`, { headers });
       setSelectedStudent(response.data);
     } catch (error) {
       console.error('Error fetching student details:', error);
@@ -228,8 +231,8 @@ const EnhancedPerformanceViews = () => {
       const headers = { 'Authorization': `Bearer ${token}` };
 
       const endpoint = activeView === 'filtered' 
-        ? 'http://localhost:8003/api/v1/performance/filtered-download'
-        : 'http://localhost:8003/api/v1/performance/overview-download';
+        ? `${API_BASE_URL}/api/v1/performance/filtered-download`
+        : `${API_BASE_URL}/api/v1/performance/overview-download`;
 
       let response;
       if (activeView === 'filtered') {

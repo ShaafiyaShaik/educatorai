@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { API_BASE_URL } from '../services/api';
 import { 
   FileText, Eye, Download, Calendar, User, Users, 
   BookOpen, Award, AlertCircle, Clock
@@ -19,7 +20,7 @@ const StudentReportsView = ({ isParentMode = false }) => {
   const token = localStorage.getItem('studentToken') || localStorage.getItem('token');
   const endpoint = isParentMode ? '/api/v1/student-dashboard/parent-reports' : '/api/v1/student-dashboard/reports';
       
-      const response = await fetch(`http://localhost:8003${endpoint}`, {
+      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       
@@ -39,7 +40,7 @@ const StudentReportsView = ({ isParentMode = false }) => {
   const token = localStorage.getItem('studentToken') || localStorage.getItem('token');
       const viewerType = isParentMode ? 'parent' : 'student';
       
-  await fetch(`http://localhost:8003/api/v1/student-dashboard/reports/${reportId}/mark-viewed?viewer_type=${viewerType}`, {
+  await fetch(`${API_BASE_URL}/api/v1/student-dashboard/reports/${reportId}/mark-viewed?viewer_type=${viewerType}`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -61,7 +62,7 @@ const StudentReportsView = ({ isParentMode = false }) => {
   const downloadReport = async (reportId, title) => {
     try {
   const token = localStorage.getItem('studentToken') || localStorage.getItem('token');
-      const response = await fetch(`http://localhost:8003/api/v1/student-dashboard/reports/${reportId}/download`, {
+      const response = await fetch(`${API_BASE_URL}/api/v1/student-dashboard/reports/${reportId}/download`, {
         headers: { 'Authorization': `Bearer ${token}` },
         responseType: 'blob'
       });

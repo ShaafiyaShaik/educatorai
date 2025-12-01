@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { API_BASE_URL } from '../services/api';
 
 const ScheduleManagement = () => {
   const [tasks, setTasks] = useState([]);
@@ -22,7 +23,7 @@ const ScheduleManagement = () => {
   const fetchTasks = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get('http://localhost:8003/api/v1/scheduling/tasks', {
+      const response = await axios.get(`${API_BASE_URL}/api/v1/scheduling/tasks`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       console.log('Tasks API response:', response.data);
@@ -37,7 +38,7 @@ const ScheduleManagement = () => {
   const fetchSections = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get('http://localhost:8003/api/v1/students/sections', {
+      const response = await axios.get(`${API_BASE_URL}/api/v1/students/sections`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       setSections(response.data);
@@ -59,7 +60,7 @@ const ScheduleManagement = () => {
     try {
       const token = localStorage.getItem('token');
       const response = await axios.get(
-        `http://localhost:8003/api/v1/scheduling/tasks/conflicts?scheduled_date=${date}&scheduled_time=${time}&duration_minutes=${duration}`,
+        `${API_BASE_URL}/api/v1/scheduling/tasks/conflicts?scheduled_date=${date}&scheduled_time=${time}&duration_minutes=${duration}`,
         { headers: { 'Authorization': `Bearer ${token}` } }
       );
       setConflicts(response.data);
@@ -74,7 +75,7 @@ const ScheduleManagement = () => {
     try {
       console.log('🚀 Sending task data:', taskData);
       const token = localStorage.getItem('token');
-      await axios.post('http://localhost:8003/api/v1/scheduling/tasks/simple', taskData, {
+      await axios.post(`${API_BASE_URL}/api/v1/scheduling/tasks/simple`, taskData, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       setShowTaskModal(false);

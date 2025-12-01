@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { API_BASE_URL } from '../services/api';
 
 const StudentManagement = () => {
   const [sections, setSections] = useState([]);
@@ -39,8 +40,8 @@ const StudentManagement = () => {
         return;
       }
       
-      // Try both ports
-      const baseUrls = ['http://localhost:8003', 'http://localhost:8001', 'http://localhost:8002'];
+      // Try the build-time API base first, then fall back to common local ports
+      const baseUrls = [API_BASE_URL, 'http://localhost:8003', 'http://localhost:8001', 'http://localhost:8002'];
       let response = null;
       
       for (const baseUrl of baseUrls) {
@@ -102,8 +103,8 @@ const StudentManagement = () => {
       if (filters.passStatus) params.append('pass_status', filters.passStatus);
       if (filters.subjectFilter) params.append('subject_filter', filters.subjectFilter);
       
-      // Use the base URL that worked for sections, or try both
-      const baseUrl = window.API_BASE_URL || 'http://localhost:8003';
+      // Use the base URL that worked for sections, or fall back to configured API_BASE_URL
+      const baseUrl = window.API_BASE_URL || API_BASE_URL;
       const url = `${baseUrl}/api/v1/students/sections/${selectedSection.id}/students/filtered?${params}`;
       console.log('Fetching students from URL:', url);
       
@@ -142,7 +143,7 @@ const StudentManagement = () => {
     try {
       const token = localStorage.getItem('token');
       const response = await axios.get(
-        `http://localhost:8003/api/v1/students/students/${student.id}/profile`,
+        `${API_BASE_URL}/api/v1/students/students/${student.id}/profile`,
         { headers: { 'Authorization': `Bearer ${token}` } }
       );
       setSelectedStudent(response.data);

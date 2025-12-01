@@ -8,6 +8,7 @@ import {
   BookOpen, GraduationCap, Target, BarChart3, Send
 } from 'lucide-react';
 import axios from 'axios';
+import { API_BASE_URL } from '../services/api';
 import { SendReportModal, SentReportsHistory } from './SendReports';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
@@ -54,8 +55,8 @@ const EnhancedPerformanceViews = () => {
 
       // Fetch sections and subjects for filters
       const [sectionsRes, dashboardRes] = await Promise.all([
-        axios.get('http://localhost:8003/api/v1/students/sections', { headers }),
-        axios.get('http://localhost:8001/api/v1/dashboard/dashboard', { headers })
+        axios.get(`${API_BASE_URL}/api/v1/students/sections`, { headers }),
+        axios.get(`${API_BASE_URL}/api/v1/dashboard/dashboard`, { headers })
       ]);
 
       setSections(sectionsRes.data.sections || []);
@@ -85,13 +86,13 @@ const EnhancedPerformanceViews = () => {
       let endpoint = '';
       switch (activeView) {
         case 'overall':
-          endpoint = 'http://localhost:8001/api/v1/performance/performance/overview';
+          endpoint = `${API_BASE_URL}/api/v1/performance/performance/overview`;
           break;
         case 'filtered':
-          endpoint = 'http://localhost:8001/api/v1/performance/performance/filtered';
+          endpoint = `${API_BASE_URL}/api/v1/performance/performance/filtered`;
           break;
         default:
-          endpoint = 'http://localhost:8001/api/v1/performance/performance/overview';
+          endpoint = `${API_BASE_URL}/api/v1/performance/performance/overview`;
       }
 
       let response;
@@ -153,7 +154,7 @@ const EnhancedPerformanceViews = () => {
       }
 
       const response = await axios.get(
-        `http://localhost:8001/api/v1/performance/performance/reports/download?${params}`,
+        `${API_BASE_URL}/api/v1/performance/performance/reports/download?${params}`,
         {
           headers: { 'Authorization': `Bearer ${token}` },
           responseType: 'blob'

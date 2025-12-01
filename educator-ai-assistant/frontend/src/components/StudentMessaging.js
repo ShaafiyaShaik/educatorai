@@ -4,6 +4,7 @@ import {
   X, Plus, Template, Filter, Search, AlertCircle
 } from 'lucide-react';
 import axios from 'axios';
+import { API_BASE_URL } from '../services/api';
 
 const StudentMessaging = () => {
   const [messages, setMessages] = useState([]);
@@ -48,9 +49,9 @@ const StudentMessaging = () => {
       const headers = { 'Authorization': `Bearer ${token}` };
 
       const [messagesRes, templatesRes, studentsRes] = await Promise.all([
-        axios.get('http://localhost:8001/api/v1/messages/sent', { headers }),
-        axios.get('http://localhost:8001/api/v1/messages/templates', { headers }),
-        axios.get('http://localhost:8003/api/v1/messages/students/summary', { headers })
+        axios.get(`${API_BASE_URL}/api/v1/messages/sent`, { headers }),
+        axios.get(`${API_BASE_URL}/api/v1/messages/templates`, { headers }),
+        axios.get(`${API_BASE_URL}/api/v1/messages/students/summary`, { headers })
       ]);
 
       setMessages(messagesRes.data);
@@ -72,7 +73,7 @@ const StudentMessaging = () => {
       const token = localStorage.getItem('token');
       const headers = { 'Authorization': `Bearer ${token}` };
 
-      await axios.post('http://localhost:8001/api/v1/messages/send', messageForm, { headers });
+      await axios.post(`${API_BASE_URL}/api/v1/messages/send`, messageForm, { headers });
       
       alert('Message sent successfully!');
       setMessageForm({
@@ -98,7 +99,7 @@ const StudentMessaging = () => {
       const token = localStorage.getItem('token');
       const headers = { 'Authorization': `Bearer ${token}` };
 
-      await axios.post('http://localhost:8001/api/v1/messages/templates', templateForm, { headers });
+      await axios.post(`${API_BASE_URL}/api/v1/messages/templates`, templateForm, { headers });
       
       alert('Template created successfully!');
       setTemplateForm({
@@ -131,7 +132,7 @@ const StudentMessaging = () => {
       const token = localStorage.getItem('token');
       const headers = { 'Authorization': `Bearer ${token}` };
 
-      const response = await axios.get(`http://localhost:8001/api/v1/messages/student/${studentId}/conversation`, { headers });
+      const response = await axios.get(`${API_BASE_URL}/api/v1/messages/student/${studentId}/conversation`, { headers });
       setSelectedStudent({
         id: studentId,
         messages: response.data,

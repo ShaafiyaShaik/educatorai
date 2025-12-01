@@ -1,7 +1,17 @@
 import axios from 'axios';
 import toast from 'react-hot-toast';
 
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8003';
+// Determine API base URL in this order:
+// 1. Build-time env var `REACT_APP_API_BASE_URL` (preferred for Render builds)
+// 2. If running on an `onrender.com` frontend host, use the paired backend service URL
+// 3. Fallback to localhost for local development
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL ||
+  ((typeof window !== 'undefined' && window.location.hostname && window.location.hostname.includes('onrender.com'))
+    ? 'https://educatorai-backend.onrender.com'
+    : 'http://localhost:8003');
+
+// Exported so other modules can build URLs when they need to bypass the api client
+export { API_BASE_URL };
 
 const api = axios.create({
   baseURL: API_BASE_URL,

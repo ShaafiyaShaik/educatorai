@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, User, Lock, GraduationCap, UserCheck, Users } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { educators } from '../services/api';
+import { educators, API_BASE_URL } from '../services/api';
 import axios from 'axios';
 
 const Login = ({ setIsAuthenticated }) => {
@@ -46,7 +46,7 @@ const Login = ({ setIsAuthenticated }) => {
         // Student login
         console.log('Attempting student login with:', formData.email);
         
-        const response = await axios.post('http://localhost:8003/api/v1/student-auth/login', {
+        const response = await axios.post(`${API_BASE_URL}/api/v1/student-auth/login`, {
           email: formData.email,
           password: formData.password
         });

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { API_BASE_URL } from '../services/api';
 
 const CalendarView = () => {
   const [events, setEvents] = useState([]);
@@ -37,7 +38,7 @@ const CalendarView = () => {
       }
       
       const response = await axios.get(
-        `http://localhost:8003/api/v1/scheduling/calendar?start_date=${startDate.toISOString().split('T')[0]}&end_date=${endDate.toISOString().split('T')[0]}`,
+        `${API_BASE_URL}/api/v1/scheduling/calendar?start_date=${startDate.toISOString().split('T')[0]}&end_date=${endDate.toISOString().split('T')[0]}`,
         { headers: { 'Authorization': `Bearer ${token}` } }
       );
       
