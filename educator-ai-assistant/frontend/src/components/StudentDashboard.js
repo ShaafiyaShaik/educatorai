@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { API_BASE_URL } from '../services/api';
 import { StudentReportsView, ParentModeToggle } from './StudentDashboardReports';
 
 const StudentDashboard = ({ studentData, onLogout }) => {
@@ -64,29 +65,29 @@ const StudentDashboard = ({ studentData, onLogout }) => {
   };
 
   const loadProfile = async () => {
-    const response = await axios.get('http://localhost:8003/api/v1/student-dashboard/profile');
+    const response = await axios.get(`${API_BASE_URL}/api/v1/student-dashboard/profile`);
     setProfile(response.data);
   };
 
   const loadMarks = async () => {
-    const response = await axios.get('http://localhost:8003/api/v1/student-dashboard/marks');
+    const response = await axios.get(`${API_BASE_URL}/api/v1/student-dashboard/marks`);
     setMarks(response.data);
   };
 
   const loadNotifications = async () => {
-    const response = await axios.get('http://localhost:8003/api/v1/student-dashboard/notifications');
+    const response = await axios.get(`${API_BASE_URL}/api/v1/student-dashboard/notifications`);
     setNotifications(response.data);
   };
 
   const loadScheduledEvents = async () => {
-    const response = await axios.get('http://localhost:8003/api/v1/student-dashboard/scheduled-events');
+    const response = await axios.get(`${API_BASE_URL}/api/v1/student-dashboard/scheduled-events`);
     setScheduledEvents(response.data);
   };
 
   const handleContactSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('http://localhost:8003/api/v1/student-dashboard/contact-teacher', contactForm);
+      await axios.post(`${API_BASE_URL}/api/v1/student-dashboard/contact-teacher`, contactForm);
       alert('Message sent successfully!');
       setContactForm({
         subject: '',

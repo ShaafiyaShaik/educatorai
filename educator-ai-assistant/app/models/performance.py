@@ -22,9 +22,6 @@ class Exam(Base):
     passing_marks = Column(Float, default=60.0)
     duration_minutes = Column(Integer, default=180)  # Exam duration
     
-    # Relationships
-    grades = relationship("Grade", back_populates="exam")
-    
     # Timestamps
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())

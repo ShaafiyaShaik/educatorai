@@ -5,6 +5,7 @@ Student models for the administrative assistant system
 from sqlalchemy import Column, Integer, String, DateTime, Boolean, Text, ForeignKey, Float
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
+from datetime import datetime
 from app.core.database import Base
 
 class Section(Base):
@@ -95,7 +96,6 @@ class Grade(Base):
     id = Column(Integer, primary_key=True, index=True)
     student_id = Column(Integer, ForeignKey("students.id"), nullable=False)
     subject_id = Column(Integer, ForeignKey("subjects.id"), nullable=False)
-    exam_id = Column(Integer, ForeignKey("exams.id"), nullable=True)  # Optional: link to specific exam
     
     # Grade information
     marks_obtained = Column(Float, nullable=False)
@@ -109,14 +109,13 @@ class Grade(Base):
     assessment_date = Column(DateTime)
     remarks = Column(Text)
     
+    # Timestamps
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
     # Relationships
     student = relationship("Student", back_populates="grades")
     subject = relationship("Subject", back_populates="grades")
-    exam = relationship("Exam", back_populates="grades")
-    
-    # Timestamps
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     
     def calculate_percentage(self):
         """Calculate percentage from marks"""

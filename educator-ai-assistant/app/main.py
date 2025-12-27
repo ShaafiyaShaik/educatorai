@@ -16,13 +16,18 @@ from contextlib import asynccontextmanager
 import uvicorn
 from app.core.config import settings
 from app.core.database import init_db
+from app.core.database import get_db
+from sqlalchemy.orm import Session
+from app.models.educator import Educator
+from app.api.educators import get_current_educator
+from app.api.students import get_filtered_section_students
 from os import getenv
 from app.api import (
     educators, dashboard, communications,
     users, students, students_auth, student_dashboard,
     bulk_communication, performance_views, student_messaging,
     scheduling, records, compliance, meeting_requests,
-    meeting_scheduler
+    meeting_scheduler, teacher_dashboard
 )
 from app.api import admin as admin_api
 
@@ -56,6 +61,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:3000",  # Local development
+        "http://localhost:3001",  # Local development alternate port
         "http://localhost:8003",  # Local backend
         "https://educatorai-frontend.onrender.com",  # Production frontend
     ],
@@ -67,6 +73,7 @@ app.add_middleware(
 # Include API routers
 app.include_router(educators.router, prefix="/api/v1/educators", tags=["educators"])
 app.include_router(dashboard.router, prefix="/api/v1/dashboard", tags=["dashboard"])
+app.include_router(teacher_dashboard.router, prefix="/api/v1", tags=["teacher-dashboard"])
 app.include_router(communications.router, prefix="/api/v1/communications", tags=["communications"])
 app.include_router(users.router, prefix="/api/v1/users", tags=["users"])
 app.include_router(students.router, prefix="/api/v1/students", tags=["students"])
@@ -94,6 +101,8 @@ app.include_router(simple_chatbot.router, prefix="/api/v1/simple-chatbot", tags=
 # Action engine: internal routes the chatbot can call to perform actions
 from app.api import action_engine
 app.include_router(action_engine.router, prefix="/api/v1/action-engine", tags=["action-engine"])
+from app.api import sections_alias
+app.include_router(sections_alias.router, prefix="/api/v1", tags=["sections-alias"])
 
 @app.get("/")
 async def root():
@@ -109,6 +118,25 @@ async def root():
             "Communication automation"
         ]
     }
+
+@app.get("/api/v1/sections/{section_id}/students/filtered")
+async def filtered_students_alias(
+    section_id: int,
+    pass_status: str | None = None,
+    subject_filter: str | None = None,
+    search: str | None = None,
+    current_educator: Educator = Depends(get_current_educator),
+    db: Session = Depends(get_db),
+):
+    # Direct alias to match frontend; proxy to students handler
+    return await get_filtered_section_students(
+        section_id=section_id,
+        pass_status=pass_status,
+        subject_filter=subject_filter,
+        search=search,
+        current_educator=current_educator,
+        db=db,
+    )
 
 @app.get("/health")
 async def health_check():

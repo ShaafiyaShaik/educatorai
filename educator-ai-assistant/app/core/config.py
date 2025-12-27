@@ -24,12 +24,11 @@ class Settings(BaseSettings):
     LOG_LEVEL: str = "INFO"
     LOG_FILE: str = "./logs/educator_assistant.log"
 
-    # Database
-    # Determine DATABASE_URL with this priority (best for deploys):
+    # Database (PostgreSQL-only)
+    # Determine DATABASE_URL with this priority:
     # 1. Environment variable `DATABASE_URL` (set by the host)
     # 2. Environment variable `PRODUCTION_DATABASE_URL` (alternate key)
     # 3. A repository file `DEPLOY_DATABASE_URL` (optional, contains the URL)
-    # 4. Fallback to the project-root SQLite file used for local development
     _deploy_file = Path(__file__).resolve().parents[2] / "DEPLOY_DATABASE_URL"
     _deploy_file_url = None
     if _deploy_file.exists():
@@ -42,7 +41,7 @@ class Settings(BaseSettings):
         os.getenv("DATABASE_URL")
         or os.getenv("PRODUCTION_DATABASE_URL")
         or _deploy_file_url
-        or "sqlite:///./educator_db.sqlite"
+        or ""
     )
 
     # Security

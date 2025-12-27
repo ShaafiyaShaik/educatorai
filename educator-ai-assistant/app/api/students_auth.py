@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 from pydantic import BaseModel, EmailStr
 from app.core.database import get_db
 from app.models.student import Student
+from app.models.educator import Educator
 from app.core.auth import verify_password, create_access_token
 from datetime import datetime, timedelta
 from jose import JWTError, jwt
@@ -101,9 +102,14 @@ async def login_student(student_data: StudentLogin, db: Session = Depends(get_db
     """Student login endpoint"""
     student = authenticate_student(db, student_data.email, student_data.password)
     if not student:
+        # Helpful hint: if this is an educator email, direct user to educator login
+        maybe_educator = db.query(Educator).filter(Educator.email == student_data.email).first()
+        hint = "Incorrect email or password"
+        if maybe_educator:
+            hint = "This is an educator account. Please use /api/v1/educators/login or select 'Teacher' portal."
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect email or password",
+            detail=hint,
             headers={"WWW-Authenticate": "Bearer"},
         )
     

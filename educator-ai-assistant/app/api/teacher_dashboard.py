@@ -15,8 +15,27 @@ from app.api.educators import get_current_educator
 from app.models.educator import Educator
 from app.models.student import Section, Student, Subject, Grade
 from app.models.notification import Notification, NotificationType, NotificationStatus
+from app.api.students import get_filtered_section_students
 
 router = APIRouter()
+@router.get("/sections/{section_id}/students/filtered")
+async def filtered_students_alias(
+    section_id: int,
+    pass_status: Optional[str] = None,
+    subject_filter: Optional[str] = None,
+    search: Optional[str] = None,
+    current_educator: Educator = Depends(get_current_educator),
+    db: Session = Depends(get_db)
+):
+    """Alias to match frontend path; proxies to students filtered handler."""
+    return await get_filtered_section_students(
+        section_id=section_id,
+        pass_status=pass_status,
+        subject_filter=subject_filter,
+        search=search,
+        current_educator=current_educator,
+        db=db,
+    )
 
 # Pydantic models for responses
 class StudentSummary(BaseModel):

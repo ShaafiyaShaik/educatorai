@@ -83,7 +83,9 @@ class CommunicationAgent:
 
     def __init__(self):
         self.text_generator = SimpleTextGenerator()
-        print(f"🤖 Communication Agent initialized (AI: {'✅' if self.text_generator.hf_pipeline else '❌ Templates only'})")
+        # Use simple text instead of emojis to avoid encoding issues
+        ai_status = "OK" if self.text_generator.hf_pipeline else "Templates only"
+        print(f"Communication Agent initialized (AI: {ai_status})")
 
     def send_automated_email(self, recipient: str, email_type: str, context: Dict[str, Any]) -> str:
         """Send automated email with AI-enhanced or template-based content"""

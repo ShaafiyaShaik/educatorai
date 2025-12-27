@@ -88,8 +88,8 @@ async def get_my_sections(
         section_data = SectionResponse(
             id=section.id,
             name=section.name,
-            academic_year=section.academic_year,
-            semester=section.semester,
+            academic_year=section.academic_year or "",
+            semester=section.semester or "",
             student_count=student_count,
             subjects=[{
                 "id": s.id,
@@ -235,6 +235,7 @@ async def get_filtered_section_students(
     """Get filtered students in a section with their grades and performance"""
     
     # Debug logging
+    
     print(f"DEBUG: section_id={section_id}, current_educator.id={current_educator.id}")
     
     # Verify section belongs to current educator
@@ -270,13 +271,15 @@ async def get_filtered_section_students(
     result = []
     for student in students:
         # Get grades for this student
-        grades = db.query(Grade).join(Subject).filter(
-            Grade.student_id == student.id
-        ).options(joinedload(Grade.subject)).all()
+        grades = []
+        try:
+            grades = db.query(Grade).join(Subject).filter(
+                Grade.student_id == student.id
+            ).options(joinedload(Grade.subject)).all()
+        except Exception:
+            # If grades query fails or no grades exist, continue with empty grades
+            grades = []
         
-        if not grades:
-            continue
-            
         grade_responses = []
         total_percentage = 0
         passed_count = 0
@@ -307,16 +310,17 @@ async def get_filtered_section_students(
                 failed_count += 1
         
         overall_average = total_percentage / len(grades) if grades else 0
-        is_overall_passed = passed_count > failed_count
+        is_overall_passed = passed_count > failed_count if grades else True
         
-        # Apply pass/fail filter
-        if pass_status == "passed" and not is_overall_passed:
-            continue
-        elif pass_status == "failed" and is_overall_passed:
-            continue
-            
-        # Apply subject performance filter (e.g., "Math<40")
-        if subject_filter:
+        # Apply pass/fail filter only if there are grades
+        if grades:
+            if pass_status == "passed" and not is_overall_passed:
+                continue
+            elif pass_status == "failed" and is_overall_passed:
+                continue
+        
+        # Apply subject performance filter (e.g., "Math<40") only if there are grades
+        if subject_filter and subject_scores:
             try:
                 if '<' in subject_filter:
                     subject_name, threshold = subject_filter.split('<')

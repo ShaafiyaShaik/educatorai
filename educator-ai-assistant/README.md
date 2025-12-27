@@ -23,7 +23,7 @@ An AI-powered administrative assistant designed to reduce the burden of non-teac
 
 - **Backend**: FastAPI (Python)
 - **AI Framework**: LangChain with OpenAI integration
-- **Database**: SQLAlchemy with SQLite/PostgreSQL support
+- **Database**: SQLAlchemy with PostgreSQL (Supabase/Render)
 - **Authentication**: JWT with bcrypt password hashing
 - **Email**: SMTP integration for automated communications
 - **Containerization**: Docker and Docker Compose
@@ -130,7 +130,7 @@ Manages routine administrative tasks:
 | Variable | Description | Required |
 |----------|-------------|----------|
 | `OPENAI_API_KEY` | OpenAI API key for AI features | Yes |
-| `DATABASE_URL` | Database connection string | No (defaults to SQLite) |
+| `DATABASE_URL` | PostgreSQL connection string | Yes (required; Postgres-only) |
 | `SECRET_KEY` | JWT secret key | Yes |
 | `EMAIL_USERNAME` | SMTP email username | No |
 | `EMAIL_PASSWORD` | SMTP email password | No |
@@ -138,7 +138,7 @@ Manages routine administrative tasks:
 ### Database
 
 The application supports multiple database backends:
-- **SQLite** (default): File-based database for development
+- **PostgreSQL** (required): Supabase or Render managed database
 - **PostgreSQL**: Recommended for production
 - **MySQL**: Alternative production database
 

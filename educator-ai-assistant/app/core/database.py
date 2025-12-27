@@ -6,11 +6,16 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from app.core.config import settings
+from os import getenv
+
+# Enforce PostgreSQL-only; disallow SQLite in production/runtime
+if settings.DATABASE_URL.startswith("sqlite:"):
+    raise SystemExit("SQLite is disabled. Set DATABASE_URL to a PostgreSQL connection string (e.g., Supabase).")
 
 # Create database engine
 engine = create_engine(
     settings.DATABASE_URL,
-    connect_args={"check_same_thread": False} if "sqlite" in settings.DATABASE_URL else {}
+    pool_pre_ping=True
 )
 
 # Create session factory
@@ -31,10 +36,5 @@ def init_db():
     """Initialize database tables"""
     # Import all models to ensure they're registered with SQLAlchemy
     import app.models
-    
-    # For SQLite, drop all tables and recreate to ensure clean schema
-    # This is safe on Render free tier since filesystem is ephemeral
-    if "sqlite" in settings.DATABASE_URL:
-        Base.metadata.drop_all(bind=engine)
     
     Base.metadata.create_all(bind=engine)

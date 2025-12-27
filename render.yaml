@@ -15,7 +15,7 @@ services:
         # value: set in Render dashboard (leave blank in repo)
         # Preferred workflow:
         # - For production use a managed DB (Postgres) and set DATABASE_URL accordingly.
-        # - For a short demo you can set: sqlite:///./educator_db.sqlite (if you commit that file)
+        # - Must be a PostgreSQL connection string (e.g., Supabase or Render Postgres)
         # - Alternatively, set `PRODUCTION_DATABASE_URL` as an env var to the same value.
         # Advanced: place a file named `DEPLOY_DATABASE_URL` at the repo root containing
         # the connection string (read by the app) — NOT recommended for secrets.

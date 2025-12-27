@@ -1,7 +1,7 @@
 Deployment note:
 	duplicate schedule rows locally. DB backups were created but not committed.
 	These scripts are in `scripts/` and can be used to recover or clean local
-	SQLite databases before deploying. No database files were added to the repo.
+	PostgreSQL (Supabase/Render) is required. No SQLite databases are used.
 
 Render deployment troubleshooting (login failing / ERR_CONNECTION_REFUSED)
 If the deployed frontend shows errors like "Failed to load resource: net::ERR_CONNECTION_REFUSED http://localhost:8003/..." then the frontend was built with a development default API URL (`http://localhost:8003`). In production (Render) the frontend must call the deployed backend URL instead of `localhost`.
@@ -11,14 +11,11 @@ Quick fix (recommended):
 Deployment notes:
 - Set the backend `DATABASE_URL` environment variable in the Render dashboard to point
 	at the database you want the deployed backend to use. The app will prefer:
-	1) `DATABASE_URL` env var
-	2) `PRODUCTION_DATABASE_URL` env var
+	1) `DATABASE_URL` env var (required)
+	2) `PRODUCTION_DATABASE_URL` env var (required)
 	3) A repository file named `DEPLOY_DATABASE_URL` (if present)
-	4) Fallback to `sqlite:///./educator_db.sqlite` (local development)
 
-If you want the Render service to use the recovered demo DB quickly for a demo,
-you may commit `educator_db.sqlite` to the repo and set `DATABASE_URL=sqlite:///./educator_db.sqlite`.
-This is convenient for demonstrations but not recommended for production.
+You must provide a PostgreSQL connection string via `DATABASE_URL`, `PRODUCTION_DATABASE_URL`, or `DEPLOY_DATABASE_URL` file. No local SQLite databases are supported.
 
 
 Why this helps:
