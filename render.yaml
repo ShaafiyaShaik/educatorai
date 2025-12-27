@@ -32,7 +32,7 @@ services:
     env: node
     plan: free
     # Build the React app located under educator-ai-assistant/frontend
-    buildCommand: cd educator-ai-assistant/frontend && npm install && npm run build && npm install -g serve
+    buildCommand: cd educator-ai-assistant/frontend && npm ci && npm run build && npm install -g serve
     startCommand: cd educator-ai-assistant/frontend && serve -s build -l $PORT
     envVars:
       - key: REACT_APP_API_BASE_URL
