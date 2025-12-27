@@ -36,8 +36,7 @@ services:
     startCommand: cd educator-ai-assistant/frontend && serve -s build -l $PORT
     envVars:
       - key: REACT_APP_API_BASE_URL
-        # Set this to the backend's public URL (e.g. https://educatorai-backend.onrender.com)
-        sync: false
+        value: "https://educatorai-backend.onrender.com"
 
 # Notes:
 # - This render.yaml defines two services: a Python web service for the FastAPI
